@@ -40,4 +40,4 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker push your-dockerhub-username/your-image-name:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/test_github_g:latest
