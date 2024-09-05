@@ -1,5 +1,5 @@
 FROM eclipse-temurin:21-jdk
-COPY ./build/libs/test_github_g-0.0.1-SNAPSHOT.jar ./test_github_g.jar
+COPY ./build/libs/test-0.0.1-SNAPSHOT.jar ./test_github_g.jar
 EXPOSE 8080
 EXPOSE 8081
 ENV SPRING_PROFILES_ACTIVE=local
