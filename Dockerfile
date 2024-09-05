@@ -1,11 +1,6 @@
-# 使用官方的Java运行时作为基础镜像
-FROM openjdk:21-jre-slim
-
-# 将JAR文件复制到容器中
-COPY target/test_github_g-0.0.1-SNAPSHOT.jar app.jar
-
-# 设置容器启动时执行的命令
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-
-# 暴露服务端口
+FROM sf-docker-base.common.repositories.cloud.sap/sapmachine:21.0.3-distroless@sha256:7cec955ef3844545e3e2a8bfc63bba5a5ef587000c00fa1037b592332ee42df7
+COPY ./build/libs/test_github_g-0.0.1-SNAPSHOT.jar ./test_github_g.jar
 EXPOSE 8080
+EXPOSE 8081
+ENV SPRING_PROFILES_ACTIVE=local
+ENTRYPOINT ["java", "-Duser.timezone=UTC", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}", "-jar", "test_github_g.jar"]
