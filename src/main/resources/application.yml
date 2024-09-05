@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: test
+---
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      base-path: /manage
+  endpoint:
+    health:
+      show-details: always
+      group:
+        readiness:
+          include: ping
+        liveness:
+          include: ping
+#          exclude: ${management.endpoint.health.group.readiness.include}
+---
+name: hello
