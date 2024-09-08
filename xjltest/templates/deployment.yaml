@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "xjltest.fullname" . }}
+  labels:
+    {{- include "xjltest.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "xjltest.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "xjltest.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "xjltest.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: main-port
+              containerPort: 8080
+            - name: manage-port
+              containerPort: 8081
+          startupProbe:
+            httpGet:
+              path: /manage/health
+              port: manage-port
+            failureThreshold: 30
+            periodSeconds: 10
+#          livenessProbe:
+#            {{- toYaml .Values.livenessProbe | nindent 12 }}
+#          readinessProbe:
+#            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- if not .Values.debug.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /manage/health/liveness
+              port: manage-port
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            timeoutSeconds: 20
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /manage/health/readiness
+              port: manage-port
+            initialDelaySeconds: 40
+            periodSeconds: 5
+            timeoutSeconds: 20
+            failureThreshold: 6
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
