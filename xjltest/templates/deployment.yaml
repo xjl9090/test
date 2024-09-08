@@ -47,10 +47,8 @@ spec:
               port: manage-port
             failureThreshold: 30
             periodSeconds: 10
-#          livenessProbe:
-#            {{- toYaml .Values.livenessProbe | nindent 12 }}
-#          readinessProbe:
-#            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- /* Locally if we are doing debugging, the readinessProbe/livenessProbe might become non-responsive
+            and restarts the pod. So for local, do not add livenessProbe/readinessProbe*/ -}}
           {{- if not .Values.debug.enabled }}
           livenessProbe:
             httpGet:
